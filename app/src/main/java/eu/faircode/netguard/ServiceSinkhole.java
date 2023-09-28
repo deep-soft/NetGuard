@@ -2014,9 +2014,9 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
                 // Allow system applications in disconnected state
                 packet.allowed = true;
                 Log.w(TAG, "Allowing disconnected system " + packet);
-            } else if (packet.uid < 2000 &&
+            } else if ((packet.uid < 2000 || BuildConfig.PLAY_STORE_RELEASE) &&
                     !mapUidKnown.containsKey(packet.uid) && isSupported(packet.protocol)) {
-                // Allow unknown system traffic
+                // Allow unknown (system) traffic
                 packet.allowed = true;
                 Log.w(TAG, "Allowing unknown system " + packet);
             } else if (packet.uid == Process.myUid()) {
@@ -3089,7 +3089,10 @@ public class ServiceSinkhole extends VpnService implements SharedPreferences.OnS
     }
 
     private void showAccessNotification(int uid) {
-        String name = TextUtils.join(", ", Util.getApplicationNames(uid, ServiceSinkhole.this));
+        List<String> apps = Util.getApplicationNames(uid, ServiceSinkhole.this);
+        if (apps.size() == 0)
+            return;
+        String name = TextUtils.join(", ", apps);
 
         Intent main = new Intent(ServiceSinkhole.this, ActivityMain.class);
         main.putExtra(ActivityMain.EXTRA_SEARCH, Integer.toString(uid));
