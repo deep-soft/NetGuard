@@ -257,10 +257,8 @@ jobs:
         shell: bash
         run: |
           set -x
-          pushd signed-apk
-          cp ${{steps.sign-NetGuard.outputs.signedReleaseFile}} ${{ env.PRG_NAME }}-latest.apk
-          ls -la ${{ env.PRG_NAME }}-latest.apk || true;
-          popd
+          cp ${{steps.sign-NetGuard.outputs.signedReleaseFile}} ${{ env.SIGNED_APK_FOLDER }}${{ env.PRG_NAME }}-latest.apk
+          ls -la ${{ env.SIGNED_APK_FOLDER }}${{ env.PRG_NAME }}-latest.apk || true;
 
       - name: Publish latest build - signed apk package
         if: env.ANDROID_SIGNING_KEY != null
