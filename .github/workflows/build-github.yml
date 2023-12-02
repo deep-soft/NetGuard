@@ -123,7 +123,7 @@ jobs:
           type: 'zip'
           filename: '${{ env.TAG_NAME }}-${{ env.TAG_VERSION }}-${{ env.PRG_FLAVOR }}-src.zip'
           directory: '.'
-          path: './'
+          path: '.'
           exclusions: '*.git* ./*.git/* ./app/schemas/* ./app/schemas/ /*node_modules/* .editorconfig'
           env_variable: 'ZIP_RELEASE_SOURCE'
           # default archive name is ${{ env.ZIP_RELEASE_ARCHIVE }}
