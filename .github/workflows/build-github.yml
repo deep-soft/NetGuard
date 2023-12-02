@@ -27,7 +27,8 @@ env:
   #  signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
   #  alias: ${{ secrets.ANDROID_ALIAS }}
   #  keyStorePassword: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
-  #  keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}  
+  #  keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+  SIGNED_APK_FOLDER: './signed-apk/'
 
 jobs:
   validation:
@@ -202,13 +203,13 @@ jobs:
           mkdir -p signed-apk
           echo "LIST: " ./app/build/outputs/apk/release/
           ls -l ./app/build/outputs/apk/release/
-          cp ./app/build/outputs/apk/release/* ./signed-apk/
-          echo "LIST: " ./signed-apk/
-          ls -l ./signed-apk/
-          #mv ./signed-apk/${{ env.PRG_NAME }}-${{ env.PRG_VERSION }}${{env.PRG_VERSION_suffix}}-${{ env.PRG_FLAVOR }}-release-unsigned.apk ./signed-apk/${{ env.PRG_NAME }}-${{ env.PRG_VERSION }}-${{ env.PRG_FLAVOR }}-release.apk
-          mv ./signed-apk/${{ env.PRG_NAME }}-${{ env.PRG_VERSION }}-release-unsigned.apk ./signed-apk/${{ env.PRG_NAME }}-${{ env.PRG_VERSION }}-${{ env.PRG_FLAVOR }}-release.apk
+          cp ./app/build/outputs/apk/release/* ${{ env.SIGNED_APK_FOLDER }}
+          echo "LIST: " ${{ env.SIGNED_APK_FOLDER }}
+          ls -l ${{ env.SIGNED_APK_FOLDER }}
+          #mv ${{ env.SIGNED_APK_FOLDER }}${{ env.PRG_NAME }}-${{ env.PRG_VERSION }}${{env.PRG_VERSION_suffix}}-${{ env.PRG_FLAVOR }}-release-unsigned.apk ${{ env.SIGNED_APK_FOLDER }}${{ env.PRG_NAME }}-${{ env.PRG_VERSION }}-${{ env.PRG_FLAVOR }}-release.apk
+          mv ${{ env.SIGNED_APK_FOLDER }}${{ env.PRG_NAME }}-${{ env.PRG_VERSION }}-release-unsigned.apk ${{ env.SIGNED_APK_FOLDER }}${{ env.PRG_NAME }}-${{ env.PRG_VERSION }}-${{ env.PRG_FLAVOR }}-release.apk
           echo "LIST: " ${{ env.PRG_NAME }}-${{ env.PRG_VERSION }}-${{ env.PRG_FLAVOR }}-release.apk
-          ls -l ./signed-apk/
+          ls -l ${{ env.SIGNED_APK_FOLDER }}
 
       - uses: deep-soft/sign-android-release@master
         name: Sign app APK
@@ -251,6 +252,26 @@ jobs:
             ${{steps.sign-NetGuard.outputs.signedReleaseFile}}
             _tag_name_.txt
 
+      - name: Prepare to Publish latest build - signed apk package
+        if: env.ANDROID_SIGNING_KEY != null
+        shell: bash
+        run: |
+          set -x
+          pushd signed-apk
+          cp ${{steps.sign-NetGuard.outputs.signedReleaseFile}} ${{ env.PRG_NAME }}-latest.apk
+          ls -la ${{ env.PRG_NAME }}-latest.apk || true;
+          popd
+
+      - name: Publish latest build - signed apk package
+        if: env.ANDROID_SIGNING_KEY != null
+        uses: deep-soft/action-gh-release@v1
+        with:
+          draft: true
+          tag_name: ${{ env.TAG_NAME }}-latest
+          files: |
+            ${{ env.SIGNED_APK_FOLDER }}${{ env.PRG_NAME }}-latest.apk
+            _tag_name_.txt
+
       - name: Publish unsigned apk package
         if: env.ANDROID_SIGNING_KEY == null
         uses: deep-soft/action-gh-release@v1
@@ -258,5 +279,5 @@ jobs:
           draft: true
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            ./signed-apk/${{ env.PRG_NAME }}-${{ env.PRG_VERSION }}-${{ env.PRG_FLAVOR }}-unsigned.apk
+            ${{ env.SIGNED_APK_FOLDER }}${{ env.PRG_NAME }}-${{ env.PRG_VERSION }}-${{ env.PRG_FLAVOR }}-unsigned.apk
             _tag_name_.txt
