@@ -1,0 +1,16 @@
+# 2024-02-18 08:50
+name: NetGuard - validation
+
+on:
+  workflow_dispatch:
+
+env:
+  PRG_NAME: "NetGuard"
+
+jobs:
+  validation:
+    if: inputs.validation == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: deep-soft/checkout@v4
+      - uses: deep-soft/wrapper-validation-action@v1
