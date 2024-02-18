@@ -12,4 +12,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: deep-soft/checkout@v4
-      - uses: deep-soft/wrapper-validation-action@v1
+      - uses: deep-soft/wrapper-validation-action@v2
