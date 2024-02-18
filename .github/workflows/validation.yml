@@ -9,7 +9,6 @@ env:
 
 jobs:
   validation:
-    if: inputs.validation == true
     runs-on: ubuntu-latest
     steps:
       - uses: deep-soft/checkout@v4
