@@ -163,33 +163,32 @@ jobs:
         run: ./gradlew assembleRelease
 
 # zip release begin
-      - name: Create Archive All
+      - name: Create Archive ALL
+        continue-on-error: true
+        id: zip_archive_all
         if: inputs.create-archive-all == true
-        uses: deep-soft/zip-release@v2
+        uses: deep-soft/zip-release@v3
         with:
-          type: 'zip'
-          filename: '${{ env.TAG_NAME }}-${{ env.TAG_VERSION }}-${{ env.PRG_FLAVOR }}-all.zip'
+          type: '7z'
+          filename: '${{ env.TAG_NAME }}-${{ env.TAG_VERSION }}-${{ env.PRG_FLAVOR }}-ALL'
           directory: '.'
-          path: './'
-          exclusions: '*.git* ./*.git/* ./app/schemas/* ./app/schemas/ /*node_modules/* .editorconfig'
+          path: '.'
+          exclusions: '*.git* /*node_modules/* .editorconfig'
+          volume_size: '2g'
+          env_variable: 'ZIP_ARCHIVE_ALL'
           # archive name is ${{ env.ZIP_RELEASE_ARCHIVE }}
 
-      - name: print env value
-        if: inputs.create-archive-all == true
-        shell: bash
-        run: |
-          echo "env.ZIP_RELEASE_ARCHIVE=${{ env.ZIP_RELEASE_ARCHIVE }}"
-
-      - name: Publish Release
-        if: inputs.create-archive-all == true
+      - name: Publish Archive ALL
+        if:  ${{ inputs.archive_ALL}}
         continue-on-error: true
         uses: deep-soft/action-gh-release@v2.1
         with:
           draft: true
-          tag_name: ${{ env.TAG_NAME }}-${{ env.PRG_FLAVOR }}
+          tag_name: ${{ env.TAG_NAME }}-${{ env.PRG_FLAVOR }}-ALL
+          filelist: ${{ steps.zip_archive_all.outputs.volumes_list_name }}
           files: |
-            ${{ env.ASSET_REL }}
-            ${{ env.ZIP_RELEASE_ARCHIVE }}
+              ${{ env.ZIP_ARCHIVE_ALL }}
+              _tag_name_.txt              
 # zip release end
 
       - name: Upload Artifact
